@@ -8,6 +8,7 @@ import {
   StyleSheet,
   StatusBar
 } from 'react-native';
+import { useRouter } from 'expo-router'; // Import the router hook
 
 // Stores text for both English and Portuguese
 const content = {
@@ -18,7 +19,7 @@ const content = {
     startButton: 'Begin Mission'
   },
   pt: {
-    title: 'O Enigma', // UPDATED from 'O Código'
+    title: 'O Enigma',
     subtitle: 'Um jogo de espionagem, códigos e segredos.',
     selectPrompt: 'Selecione seu idioma:',
     startButton: 'Iniciar Missão'
@@ -28,11 +29,14 @@ const content = {
 export default function App() {
   // State for the current language, 'en' is the default
   const [language, setLanguage] = useState('en');
+  const router = useRouter(); // Initialize the router
 
-  // This will handle moving to the next screen later
+  // This function now navigates to the missionHub screen
   const handleBeginMission = () => {
-    // For now, it just shows an alert.
-    alert('Proceeding to the next screen...');
+    router.push({
+      pathname: '/missionHub',
+      params: { language: language } // Pass the selected language
+    });
   };
 
   return (
