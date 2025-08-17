@@ -31,7 +31,7 @@ export default function App() {
   const [language, setLanguage] = useState('en');
   const router = useRouter(); // Initialize the router
 
-  // This function now navigates to the missionHub screen
+  // This function navigates to the missionHub screen
   const handleBeginMission = () => {
     router.push({
       pathname: '/missionHub',
