@@ -7,8 +7,11 @@ export default function MissionSuccessScreen() {
   const { decryptedMessage, language } = useLocalSearchParams();
 
   const handleContinue = () => {
-    // Navigate back to the mission hub to see the progress.
-    router.push('/missionHub');
+    // Navigate back to the mission hub, making sure to pass the language.
+    router.push({
+        pathname: '/missionHub',
+        params: { language: language }
+    });
   };
 
   return (
