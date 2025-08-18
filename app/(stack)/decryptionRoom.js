@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Mission and puzzle data can be kept in a separate file later on.
 const missions = [
@@ -104,10 +105,31 @@ export default function DecryptionRoomScreen() {
     }
   };
   
-  const checkSolution = () => {
+  const checkSolution = async () => {
     if (parseInt(userInputKey, 10) === randomKey) {
       setIsSolved(true);
-      alert('Success! Message Decrypted.');
+      
+      // Save progress to AsyncStorage
+      try {
+        const completed = await AsyncStorage.getItem('completedMissions');
+        const completedList = completed ? JSON.parse(completed) : [];
+        if (!completedList.includes(missionId)) {
+          completedList.push(missionId);
+          await AsyncStorage.setItem('completedMissions', JSON.stringify(completedList));
+        }
+      } catch (e) {
+        console.error("Failed to save progress.", e);
+      }
+
+      // Navigate to the success screen
+      router.push({
+        pathname: '/missionSuccess',
+        params: {
+          decryptedMessage: currentPuzzle.plaintext[language],
+          language: language
+        }
+      });
+
     } else {
       alert('Incorrect. Try a different key.');
     }

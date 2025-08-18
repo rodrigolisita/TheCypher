@@ -1,32 +1,32 @@
-import React from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Mission data, including multilingual titles.
+// Mission data, now without the hardcoded 'locked' property.
 const missions = [
   { id: '1', title: { en: 'Operation Nightingale', pt: 'Projeto Rouxinol' }, difficulty: 'Easy', cipher: 'Caesar' },
   { id: '2', title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, difficulty: 'Easy', cipher: 'Atbash' },
   { id: '3', title: { en: 'Viper\'s Nest', pt: 'Covil da Víbora' }, difficulty: 'Medium', cipher: 'Vigenère' },
-  { id: '4', title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, difficulty: 'Hard', cipher: 'RSA', locked: true },
-  { id: '5', title: { en: 'Shadow Veil', pt: 'Véu das Sombras' }, difficulty: 'Hard', cipher: 'AES', locked: true },
+  { id: '4', title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, difficulty: 'Hard', cipher: 'RSA' },
+  { id: '5', title: { en: 'Shadow Veil', pt: 'Véu das Sombras' }, difficulty: 'Hard', cipher: 'AES' },
 ];
 
 // Reusable component for displaying a single mission.
-const MissionCell = ({ mission, onPress, language }) => {
-  const isLocked = mission.locked;
+const MissionCell = ({ mission, onPress, language, isUnlocked }) => {
   return (
     <TouchableOpacity 
-      style={[styles.cell, isLocked && styles.cellLocked]}
-      onPress={() => !isLocked && onPress(mission)}
-      disabled={isLocked}
+      style={[styles.cell, !isUnlocked && styles.cellLocked]}
+      onPress={() => isUnlocked && onPress(mission)}
+      disabled={!isUnlocked}
     >
       <View>
-        <Text style={[styles.cellTitle, isLocked && styles.cellTextLocked]}>{mission.title[language]}</Text>
-        <Text style={[styles.cellSubtitle, isLocked && styles.cellTextLocked]}>
+        <Text style={[styles.cellTitle, !isUnlocked && styles.cellTextLocked]}>{mission.title[language]}</Text>
+        <Text style={[styles.cellSubtitle, !isUnlocked && styles.cellTextLocked]}>
           {language === 'pt' ? 'Dificuldade' : 'Difficulty'}: {mission.difficulty}
         </Text>
       </View>
-      {isLocked && (
+      {!isUnlocked && (
         <Text style={styles.lockedText}>LOCKED</Text>
       )}
     </TouchableOpacity>
@@ -34,14 +34,47 @@ const MissionCell = ({ mission, onPress, language }) => {
 };
 
 export default function MissionHubScreen() {
-  const { language } = useLocalSearchParams();
+  const params = useLocalSearchParams();
   const router = useRouter();
+  const [completedMissions, setCompletedMissions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  // Add state to remember the language.
+  const [currentLanguage, setCurrentLanguage] = useState(params.language || 'en');
+
+  // This effect updates our language state if a new param is passed.
+  useEffect(() => {
+    if (params.language) {
+      setCurrentLanguage(params.language);
+    }
+  }, [params.language]);
+
+  // useFocusEffect runs every time the screen comes into view.
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadProgress = async () => {
+        setIsLoading(true); // Start loading
+        try {
+          const completed = await AsyncStorage.getItem('completedMissions');
+          if (completed !== null) {
+            setCompletedMissions(JSON.parse(completed));
+          } else {
+            setCompletedMissions([]); // Ensure it's an empty array if nothing is stored
+          }
+        } catch (e) {
+          console.error("Failed to load progress.", e);
+        } finally {
+          setIsLoading(false); // Finish loading
+        }
+      };
+      loadProgress();
+    }, [])
+  );
 
   const handleMissionSelect = (mission) => {
     // Navigate to the decryption room, passing the mission's ID and language.
     router.push({ 
       pathname: '/decryptionRoom', 
-      params: { missionId: mission.id, language: language }
+      params: { missionId: mission.id, language: currentLanguage }
     });
   };
 
@@ -49,29 +82,40 @@ export default function MissionHubScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.title}>
-          {language === 'pt' ? 'Central de Missões' : 'Mission Hub'}
+          {currentLanguage === 'pt' ? 'Central de Missões' : 'Mission Hub'}
         </Text>
         <Text style={styles.subtitle}>
-          {language === 'pt' ? 'Selecione sua próxima missão.' : 'Select your next mission.'}
+          {currentLanguage === 'pt' ? 'Selecione sua próxima missão.' : 'Select your next mission.'}
         </Text>
       </View>
 
-      <FlatList
-        data={missions}
-        renderItem={({ item }) => (
-          <MissionCell 
-            mission={item} 
-            onPress={handleMissionSelect}
-            language={language}
-          />
-        )}
-        keyExtractor={item => item.id}
-        style={styles.list}
-      />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#00ff7f" />
+        </View>
+      ) : (
+        <FlatList
+          data={missions}
+          renderItem={({ item, index }) => {
+            // A mission is unlocked if it's the first one, or if the previous one is completed.
+            const isUnlocked = index === 0 || completedMissions.includes(missions[index - 1].id);
+            return (
+              <MissionCell 
+                mission={item} 
+                onPress={handleMissionSelect}
+                language={currentLanguage}
+                isUnlocked={isUnlocked}
+              />
+            );
+          }}
+          keyExtractor={item => item.id}
+          style={styles.list}
+        />
+      )}
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/')}>
         <Text style={styles.backButtonText}>
-          {language === 'pt' ? 'Voltar' : 'Go Back'}
+          {currentLanguage === 'pt' ? 'Voltar' : 'Go Back'}
         </Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -101,6 +145,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 10,
     fontFamily: 'monospace',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   list: {
     width: '100%',

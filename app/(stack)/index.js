@@ -6,9 +6,11 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
-  StatusBar
+  StatusBar,
+  Alert
 } from 'react-native';
-import { useRouter } from 'expo-router'; // Import the router hook
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Stores text for both English and Portuguese
 const content = {
@@ -16,13 +18,19 @@ const content = {
     title: 'The Cypher',
     subtitle: 'A spy game of codes and secrets.',
     selectPrompt: 'Select your language:',
-    startButton: 'Begin Mission'
+    startButton: 'Begin Mission',
+    resetButton: 'Reset Progress',
+    resetConfirmTitle: 'Reset Progress',
+    resetConfirmMessage: 'Are you sure you want to clear all saved progress?'
   },
   pt: {
     title: 'O Enigma',
     subtitle: 'Um jogo de espionagem, códigos e segredos.',
     selectPrompt: 'Selecione seu idioma:',
-    startButton: 'Iniciar Missão'
+    startButton: 'Iniciar Missão',
+    resetButton: 'Resetar Progresso',
+    resetConfirmTitle: 'Resetar Progresso',
+    resetConfirmMessage: 'Tem certeza que deseja apagar todo o progresso salvo?'
   }
 };
 
@@ -31,12 +39,34 @@ export default function App() {
   const [language, setLanguage] = useState('en');
   const router = useRouter(); // Initialize the router
 
-  // This function navigates to the missionHub screen
+  // This function now navigates to the missionHub screen
   const handleBeginMission = () => {
     router.push({
       pathname: '/missionHub',
       params: { language: language } // Pass the selected language
     });
+  };
+
+  const handleResetProgress = async () => {
+    Alert.alert(
+      content[language].resetConfirmTitle,
+      content[language].resetConfirmMessage,
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Reset", 
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('completedMissions');
+              alert('Progress has been reset.');
+            } catch (e) {
+              console.error("Failed to reset progress.", e);
+            }
+          },
+          style: "destructive"
+        }
+      ]
+    );
   };
 
   return (
@@ -71,10 +101,15 @@ export default function App() {
         </View>
       </View>
 
-      {/* The main action button to start the game */}
-      <TouchableOpacity style={styles.button} onPress={handleBeginMission}>
-        <Text style={styles.buttonText}>{content[language].startButton}</Text>
-      </TouchableOpacity>
+      {/* Container for the main action buttons */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={handleBeginMission}>
+          <Text style={styles.buttonText}>{content[language].startButton}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.resetButton} onPress={handleResetProgress}>
+          <Text style={styles.resetButtonText}>{content[language].resetButton}</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -129,6 +164,10 @@ const styles = StyleSheet.create({
     opacity: 1.0,
     transform: [{ scale: 1.1 }], // Slightly enlarge the selected flag
   },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
   button: {
     backgroundColor: '#00ff7f',
     paddingVertical: 15,
@@ -139,11 +178,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 4,
+    width: '80%',
+    alignItems: 'center',
   },
   buttonText: {
     color: '#1a1a1a',
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'monospace',
+  },
+  resetButton: {
+    marginTop: 15,
+    borderColor: '#ff4444',
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+  resetButtonText: {
+    color: '#ff4444',
+    fontSize: 14,
     fontFamily: 'monospace',
   }
 });
