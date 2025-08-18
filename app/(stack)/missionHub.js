@@ -2,7 +2,7 @@ import React from 'react';
 import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-// Sample data for the missions
+// Mission data, including multilingual titles.
 const missions = [
   { id: '1', title: { en: 'Operation Nightingale', pt: 'Projeto Rouxinol' }, difficulty: 'Easy', cipher: 'Caesar' },
   { id: '2', title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, difficulty: 'Easy', cipher: 'Atbash' },
@@ -11,7 +11,7 @@ const missions = [
   { id: '5', title: { en: 'Shadow Veil', pt: 'Véu das Sombras' }, difficulty: 'Hard', cipher: 'AES', locked: true },
 ];
 
-// A new, reusable component to display a single mission in the list.
+// Reusable component for displaying a single mission.
 const MissionCell = ({ mission, onPress, language }) => {
   const isLocked = mission.locked;
   return (
@@ -21,7 +21,6 @@ const MissionCell = ({ mission, onPress, language }) => {
       disabled={isLocked}
     >
       <View>
-        {/* Access the title based on the current language */}
         <Text style={[styles.cellTitle, isLocked && styles.cellTextLocked]}>{mission.title[language]}</Text>
         <Text style={[styles.cellSubtitle, isLocked && styles.cellTextLocked]}>
           {language === 'pt' ? 'Dificuldade' : 'Difficulty'}: {mission.difficulty}
@@ -39,10 +38,11 @@ export default function MissionHubScreen() {
   const router = useRouter();
 
   const handleMissionSelect = (mission) => {
-    // The alert also uses the correct language
-    alert(`${language === 'pt' ? 'Missão Selecionada' : 'Selected Mission'}: ${mission.title[language]}`);
-    // Example of future navigation:
-    // router.push({ pathname: '/decryptionRoom', params: { missionId: mission.id, language: language }});
+    // Navigate to the decryption room, passing the mission's ID and language.
+    router.push({ 
+      pathname: '/decryptionRoom', 
+      params: { missionId: mission.id, language: language }
+    });
   };
 
   return (
@@ -56,7 +56,6 @@ export default function MissionHubScreen() {
         </Text>
       </View>
 
-      {/* FlatList to render the mission data */}
       <FlatList
         data={missions}
         renderItem={({ item }) => (
@@ -148,7 +147,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 8,
-    marginTop: 20, // Add margin to separate from the list
+    marginTop: 20, 
   },
   backButtonText: {
     color: '#00ff7f',
