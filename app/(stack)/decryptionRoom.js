@@ -6,12 +6,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import the puzzle components
 import CaesarPuzzle from '../../components/puzzles/CaesarPuzzle';
 import AtbashPuzzle from '../../components/puzzles/AtbashPuzzle';
+import VigenerePuzzle from '../../components/puzzles/VigenerePuzzle';
+import AsymmetricPuzzle from '../../components/puzzles/AsymmetricPuzzle';
 
 // Import the mission data from our central file
 import { missions, puzzleData } from '../../data/missionData';
 
 
 export default function DecryptionRoomScreen() {
+  console.log('VigenerePuzzle type:', typeof VigenerePuzzle);
+  console.log('AsymmetricPuzzle type:', typeof AsymmetricPuzzle);
+
   const router = useRouter();
   const { missionId, language } = useLocalSearchParams();
   const [isCodexVisible, setIsCodexVisible] = useState(false);
@@ -67,6 +72,10 @@ export default function DecryptionRoomScreen() {
             return <CaesarPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
         case 'Atbash':
             return <AtbashPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+        case 'Vigenère':
+            return <VigenerePuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+        case 'Asymmetric':
+            return <AsymmetricPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
         default:
             return <Text style={styles.errorText}>Unknown Cipher</Text>;
     }
