@@ -5,6 +5,7 @@ export const missions = [
   { id: '2', title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, difficulty: 'Easy', cipher: 'Atbash' },
   { id: '3', title: { en: 'Viper\'s Nest', pt: 'Covil da Víbora' }, difficulty: 'Medium', cipher: 'Vigenère' },
   { id: '4', title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, difficulty: 'Hard', cipher: 'Asymmetric' },
+  { id: '5', title: { en: 'Shadow Veil', pt: 'Véu das Sombraas' }, difficulty: 'Hard', cipher: 'Symmetric' },
 ];
 
 export const puzzleData = {
@@ -79,6 +80,25 @@ export const puzzleData = {
         text: {
             en: 'Asymmetric encryption uses two keys: a public key and a private key.\n\n1. A message (YELLOW) is encrypted using a PUBLIC key (BLUE), creating a new result (GREEN).\n\n2. Anyone can see the public key and the final result, but only you have the PRIVATE key filter.\n\n3. Your task is to select the correct private key filter to reverse the encryption and find the original message color.',
             pt: 'A criptografia assimétrica usa duas chaves: uma chave pública e uma chave privada.\n\n1. Uma mensagem (AMARELO) é criptografada usando uma chave PÚBLICA (AZUL), criando um novo resultado (VERDE).\n\n2. Qualquer um pode ver a chave pública e o resultado final, mas apenas você tem o filtro da chave PRIVADA.\n\n3. Sua tarefa é selecionar o filtro de chave privada correto para reverter a criptografia e encontrar a cor da mensagem original.'
+        }
+    }
+  },
+  '5': {
+    plaintext: {
+        en: 'RENDEZVOUS AT DAWN',
+        pt: 'ENCONTRO AO AMANHECER'
+    },
+    //key: [0, 4, 8, 3], // The correct pattern sequence (top-left, middle-center, bottom-right, middle-left)
+    keyLength: 1, // The length of the random pattern to generate
+    hint: {
+        en: 'Agent, the key is a shared 1-step pattern. Replicate the sequence on the grid to decrypt the message.',
+        pt: 'Agente, a chave é um padrão compartilhado de 1 passo. Replique a sequência na grade para descriptografar a mensagem.'
+    },
+    codex: {
+        title: 'Modern Symmetric Ciphers',
+        text: {
+            en: 'Modern symmetric ciphers like AES use a single, complex shared key for both encryption and decryption.\n\nThis key is not a simple word or number, but a complex piece of data, represented here as a pattern.\n\nIf both parties have the exact same secret key (the pattern), the message can be decrypted instantly.',
+            pt: 'Cifras simétricas modernas como o AES usam uma única chave secreta e complexa tanto para criptografar quanto para descriptografar.\n\nEsta chave não é uma palavra ou número simples, mas um dado complexo, representado aqui como um padrão.\n\nSe ambas as partes tiverem a mesma chave secreta (o padrão), a mensagem pode ser descriptografada instantaneamente.'
         }
     }
   }

@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // Import the puzzle components
-import CaesarPuzzle from '../../components/puzzles/CaesarPuzzle';
-import AtbashPuzzle from '../../components/puzzles/AtbashPuzzle';
-import VigenerePuzzle from '../../components/puzzles/VigenerePuzzle';
 import AsymmetricPuzzle from '../../components/puzzles/AsymmetricPuzzle';
+import AtbashPuzzle from '../../components/puzzles/AtbashPuzzle';
+import CaesarPuzzle from '../../components/puzzles/CaesarPuzzle';
+import SymmetricPuzzle from '../../components/puzzles/SymmetricPuzzle';
+import VigenerePuzzle from '../../components/puzzles/VigenerePuzzle';
+
 
 // Import the mission data from our central file
 import { missions, puzzleData } from '../../data/missionData';
@@ -76,6 +78,8 @@ export default function DecryptionRoomScreen() {
             return <VigenerePuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
         case 'Asymmetric':
             return <AsymmetricPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+        case 'Symmetric':
+            return <SymmetricPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
         default:
             return <Text style={styles.errorText}>Unknown Cipher</Text>;
     }
