@@ -33,25 +33,37 @@ export default function DecryptionRoomScreen() {
   }, []);
   
   const handleSolve = async () => {
-      // This function is passed to the puzzle components.
-      try {
-        const completed = await AsyncStorage.getItem('completedMissions');
-        const completedList = completed ? JSON.parse(completed) : [];
-        if (!completedList.includes(missionId)) {
-          completedList.push(missionId);
-          await AsyncStorage.setItem('completedMissions', JSON.stringify(completedList));
-        }
-      } catch (e) {
-        console.error("Failed to save progress.", e);
+    // This function is passed to the puzzle components.
+    try {
+      const completed = await AsyncStorage.getItem('completedMissions');
+      const completedList = completed ? JSON.parse(completed) : [];
+      if (!completedList.includes(missionId)) {
+        completedList.push(missionId);
+        await AsyncStorage.setItem('completedMissions', JSON.stringify(completedList));
       }
+    } catch (e) {
+      console.error("Failed to save progress.", e);
+    }
 
+    // Check if this is the final mission
+    if (missionId === '5') {
+      // If so, go to the game complete screen
+      router.navigate({
+        pathname: '/gameComplete',
+        params: { language: language }
+      });
+    } else {
+      // Otherwise, go to the collection screen as usual
       router.push({
-        pathname: '/missionSuccess',
+        pathname: './collection',
         params: {
-          decryptedMessage: currentPuzzle.plaintext[language],
-          language: language
+            missionId: missionId,
+            decryptedMessage: currentPuzzle.plaintext[language],
+            language: language
         }
       });
+    }
+      
   };
 
   const handleGoBack = () => {

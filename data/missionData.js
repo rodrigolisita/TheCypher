@@ -1,18 +1,58 @@
 // This file acts as our central database for all mission and puzzle content.
+export const allItems = [
+  { id: 'item-1', name: { en: 'Microfilm', pt: 'Microfilme' } },
+  { id: 'item-2', name: { en: 'Disguise', pt: 'Disfarce' } },
+  { id: 'item-3', name: { en: 'Keycard', pt: 'Cartão de Acesso' } },
+  { id: 'item-4', name: { en: 'Encrypted USB', pt: 'USB Criptografado' } },
+  { id: 'item-5', name: { en: 'Confidential Dossier', pt: 'Dossiê Confidencial' } },
+  { id: 'item-6', name: { en: 'Tracking Device', pt: 'Dispositivo Rastreador' } },
+];
 
 export const missions = [
-  { id: '1', title: { en: 'Operation Nightingale', pt: 'Projeto Rouxinol' }, difficulty: 'Easy', cipher: 'Caesar' },
-  { id: '2', title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, difficulty: 'Easy', cipher: 'Atbash' },
-  { id: '3', title: { en: 'Viper\'s Nest', pt: 'Covil da Víbora' }, difficulty: 'Medium', cipher: 'Vigenère' },
-  { id: '4', title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, difficulty: 'Hard', cipher: 'Asymmetric' },
-  { id: '5', title: { en: 'Shadow Veil', pt: 'Véu das Sombraas' }, difficulty: 'Hard', cipher: 'Symmetric' },
+  { 
+    id: '1', 
+    title: { en: 'Operation Nightingale', pt: 'Projeto Rouxinol' }, 
+    difficulty: 'Easy', 
+    cipher: 'Caesar',
+    requiredItems: ['item-1', 'item-3'] // Requires Microfilm and Keycard
+  },
+  { 
+    id: '2', 
+    title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, 
+    difficulty: 'Easy', 
+    cipher: 'Atbash',
+    requiredItems: ['item-5'] // Requires Confidential Dossier
+  },
+  { 
+    id: '3', 
+    title: { en: 'Viper\'s Nest', pt: 'Covil da Víbora' }, 
+    difficulty: 'Medium', 
+    cipher: 'Vigenère',
+    requiredItems: ['item-6', 'item-4'] // Requires Tracking Device and Encrypted USB
+  },
+  { 
+    id: '4', 
+    title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, 
+    difficulty: 'Hard', 
+    cipher: 'Asymmetric',
+    requiredItems: ['item-2'] // Requires Disguise
+  },
+  { 
+    id: '5', 
+    title: { en: 'Shadow Veil', pt: 'Véu das Sombraas' }, 
+    difficulty: 'Hard', 
+    cipher: 'Symmetric',
+    requiredItems: ['item-2', 'item-4', 'item-5'] // Requires Disguise, USB, and Dossier
+  },
 ];
 
 export const puzzleData = {
   '1': {
     plaintext: {
-        en: 'MEET AT THE OLD BRIDGE AT MIDNIGHT',
-        pt: 'ENCONTRE NA PONTE VELHA A MEIA NOITE'
+        //en: 'MEET AT THE OLD BRIDGE AT MIDNIGHT',
+        //pt: 'ENCONTRE NA PONTE VELHA A MEIA NOITE'
+        en: 'AGENT B SENDING NEW ORDERS BRING THE MICROFILM AND THE KEYCARD',
+        pt: 'AGENTE B ENVIANDO NOVAS ORDENS TRAGA O MICROFILME E O CARTAO DE ACESSO'
     },
     hint: {
       en: 'Agent, this is a simple Caesar cipher. Find the correct numerical shift (1-25) to reveal the message.',
@@ -28,8 +68,10 @@ export const puzzleData = {
   },
   '2': {
     plaintext: {
-        en: 'THE PACKAGE IS IN THE RED LOCKER',
-        pt: 'O PACOTE ESTA NO ARMARIO VERMELHO'
+        //en: 'THE PACKAGE IS IN THE RED LOCKER',
+        //pt: 'O PACOTE ESTA NO ARMARIO VERMELHO'
+        en: 'YOUR NEXT OBJECTIVE IS TO SECURE THE CONFIDENTIAL DOSSIER',
+        pt: 'SEU PROXIMO OBJETIVO E PROTEGER O DOSSIE CONFIDENCIAL'
     },
     hint: {
         en: 'This message uses an Atbash cipher, a simple substitution where the alphabet is reversed. No key is needed.',
@@ -45,8 +87,10 @@ export const puzzleData = {
   },
   '3': {
     plaintext: {
-        en: 'THE EAGLE HAS LANDED',
-        pt: 'A AGUIA POUSOU'
+        //en: 'THE EAGLE HAS LANDED',
+        //pt: 'A AGUIA POUSOU'
+        en: 'PLANT THE TRACKING DEVICE ON THE TARGETS ENCRYPTED USB',
+        pt: 'PLANTE O DISPOSITIVO RASTREADOR NO USB CRIPTOGRAFADO DO ALVO'
     },
     key: 'SECRET',
     hintedKey: 'S_CR_T', // The fill-in-the-blanks hint for the user
@@ -64,8 +108,10 @@ export const puzzleData = {
   },
   '4': {
     plaintext: {
-        en: 'MESSAGE IS YELLOW', // The solution is the color itself
-        pt: 'A MENSAGEM É AMARELA'
+        //en: 'MESSAGE IS YELLOW', // The solution is the color itself
+        //pt: 'A MENSAGEM É AMARELA'
+        en: 'URGENT YOU MUST USE A DISGUISE FOR THIS OPERATION',
+        pt: 'URGENTE VOCE DEVE USAR UM DISFARCE PARA ESTA OPERACAO'
     },
     publicKey: 'BLUE',
     message: 'YELLOW',
@@ -85,8 +131,10 @@ export const puzzleData = {
   },
   '5': {
     plaintext: {
-        en: 'RENDEZVOUS AT DAWN',
-        pt: 'ENCONTRO AO AMANHECER'
+        //en: 'RENDEZVOUS AT DAWN',
+        //pt: 'ENCONTRO AO AMANHECER'
+        en: 'FINAL MISSION COLLECT THE DISGUISE THE ENCRYPTED USB AND THE CONFIDENTIAL DOSSIER',
+        pt: 'MISSAO FINAL COLETE O DISFARCE O USB CRIPTOGRAFADO E O DOSSIE CONFIDENCIAL'
     },
     //key: [0, 4, 8, 3], // The correct pattern sequence (top-left, middle-center, bottom-right, middle-left)
     keyLength: 1, // The length of the random pattern to generate
