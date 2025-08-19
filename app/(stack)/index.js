@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react'; // MODIFIED
 import {
+  ActivityIndicator // NEW
+  ,
+  Alert,
+  Image,
   SafeAreaView,
-  View,
+  StatusBar,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  Image,
-  StyleSheet,
-  StatusBar,
-  Alert
+  View
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Stores text for both English and Portuguese
 const content = {
@@ -35,18 +37,44 @@ const content = {
 };
 
 export default function App() {
-  // State for the current language, 'en' is the default
   const [language, setLanguage] = useState('en');
-  const router = useRouter(); // Initialize the router
+  // NEW: Loading state to prevent UI flicker while loading from storage
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  // This function now navigates to the missionHub screen
+  // NEW: This useEffect runs once to load the saved language
+  useEffect(() => {
+    const loadLanguage = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem('user-language');
+        if (savedLanguage !== null) {
+          setLanguage(savedLanguage);
+        }
+      } catch (e) {
+        console.error('Failed to load language from storage.', e);
+      } finally {
+        setIsLoading(false); // Stop loading once done
+      }
+    };
+    loadLanguage();
+  }, []);
+
+  // NEW: This function now saves the language choice
+  const handleLanguageChange = async (selectedLang) => {
+    setLanguage(selectedLang);
+    try {
+      await AsyncStorage.setItem('user-language', selectedLang);
+    } catch (e) {
+      console.error('Failed to save language to storage.', e);
+    }
+  };
+
   const handleBeginMission = () => {
     router.push({
       pathname: '/missionHub',
-      params: { language: language } // Pass the selected language
+      params: { language: language }
     });
   };
-
   const handleResetProgress = async () => {
     Alert.alert(
       content[language].resetConfirmTitle,
@@ -69,29 +97,37 @@ export default function App() {
     );
   };
 
+  // NEW: While loading from storage, show a spinner
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#00ff7f" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Set status bar text to light for the dark theme */}
       <StatusBar barStyle="light-content" />
-      
-      {/* Main title section */}
+
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{content[language].title}</Text>
         <Text style={styles.subtitle}>{content[language].subtitle}</Text>
       </View>
 
-      {/* Language selection section */}
       <View style={styles.languageSelector}>
         <Text style={styles.prompt}>{content[language].selectPrompt}</Text>
         <View style={styles.flagsContainer}>
-          <TouchableOpacity onPress={() => setLanguage('en')}>
+          {/* MODIFIED: Use the new handler function */}
+          <TouchableOpacity onPress={() => handleLanguageChange('en')}>
             <Image 
               source={require('../../assets/flag_uk.png')}
               style={[styles.flag, language === 'en' && styles.selectedFlag]} 
               onError={(e) => console.log('Error loading UK flag:', e.nativeEvent.error)}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setLanguage('pt')}>
+          {/* MODIFIED: Use the new handler function */}
+          <TouchableOpacity onPress={() => handleLanguageChange('pt')}>
             <Image 
               source={require('../../assets/flag_brazil.png')}
               style={[styles.flag, language === 'pt' && styles.selectedFlag]} 
@@ -101,7 +137,6 @@ export default function App() {
         </View>
       </View>
 
-      {/* Container for the main action buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleBeginMission}>
           <Text style={styles.buttonText}>{content[language].startButton}</Text>
