@@ -2,31 +2,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { allItems, missions } from '../../data/missionData';
+import { allItems } from '../../data/missionData';
 
 export default function CollectionScreen() {
   const router = useRouter();
-  const { language, decryptedMessage, missionId } = useLocalSearchParams();
+  const { language, decryptedMessage, missionId, requiredItems } = useLocalSearchParams();
   const [selectedItems, setSelectedItems] = useState([]);
 
-  // --- Task 4 Logic: Find the current mission's data ---
-  const currentMission = useMemo(() => {
-    return missions.find(m => m.id === missionId);
-  }, [missionId]);
-
-  // --- Task 4 Logic: Check if the selection is correct ---
+  // The logic now uses the requiredItems passed via navigation params
   const isSelectionCorrect = useMemo(() => {
-    if (!currentMission) return false;
+    if (!requiredItems) return false;
 
-    const required = currentMission.requiredItems.sort();
-    const selected = [...selectedItems].sort(); // Create a sorted copy
+    // Parse the JSON string back into an array and sort it
+    const required = JSON.parse(requiredItems).sort();
+    const selected = [...selectedItems].sort();
 
     if (required.length !== selected.length) return false;
     
     return required.every((value, index) => value === selected[index]);
-  }, [selectedItems, currentMission]);
+  }, [selectedItems, requiredItems]);
 
-  // --- Task 5 Logic: Handle delivering items ---
   const handleDeliverItems = async () => {
     if (!isSelectionCorrect) return; // Failsafe
 
@@ -42,12 +37,10 @@ export default function CollectionScreen() {
       console.error("Failed to save progress.", e);
     }
     
-    // Navigate back to the mission hub
-    //router.back();
-    //router.navigate('/missionHub');
+    // Navigate back to the mission hub, passing the language
     router.navigate({
         pathname: '/missionHub',
-        params: { language: language } // Add this line
+        params: { language: language }
     });
   };
 
@@ -90,7 +83,7 @@ export default function CollectionScreen() {
       <TouchableOpacity
         style={[styles.deliverButton, !isSelectionCorrect && styles.deliverButtonDisabled]}
         disabled={!isSelectionCorrect}
-        onPress={handleDeliverItems} // --- Connects to our Task 5 logic ---
+        onPress={handleDeliverItems}
       >
         <Text style={styles.deliverButtonText}>{language === 'pt' ? 'Entregar Itens' : 'Deliver Items'}</Text>
       </TouchableOpacity>

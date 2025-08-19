@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 // Import the puzzle components
 import AsymmetricPuzzle from '../../components/puzzles/AsymmetricPuzzle';
@@ -10,22 +11,46 @@ import CaesarPuzzle from '../../components/puzzles/CaesarPuzzle';
 import SymmetricPuzzle from '../../components/puzzles/SymmetricPuzzle';
 import VigenerePuzzle from '../../components/puzzles/VigenerePuzzle';
 
-
-// Import the mission data from our central file
-import { missions, puzzleData } from '../../data/missionData';
+// Import the mission data from our central file, including allItems
+import { allItems, missions, puzzleData } from '../../data/missionData';
 
 
 export default function DecryptionRoomScreen() {
-  console.log('VigenerePuzzle type:', typeof VigenerePuzzle);
-  console.log('AsymmetricPuzzle type:', typeof AsymmetricPuzzle);
-
   const router = useRouter();
   const { missionId, language } = useLocalSearchParams();
   const [isCodexVisible, setIsCodexVisible] = useState(false);
+  const [dynamicMissionData, setDynamicMissionData] = useState(null);
 
-  // Find the selected mission and its corresponding puzzle.
+  // Find the static mission data (we still need it for title, cipher, etc.)
   const selectedMission = missions.find(m => m.id === missionId);
   const currentPuzzle = puzzleData[missionId];
+
+  // This useEffect generates the random mission objectives and plaintext
+  useEffect(() => {
+    if (selectedMission) {
+      // 1. Shuffle all possible items to get a random order
+      const shuffled = [...allItems].sort(() => 0.5 - Math.random());
+      
+      // 2. Select the number of items required by the mission
+      const selected = shuffled.slice(0, selectedMission.numRequiredItems);
+      const requiredItemIds = selected.map(item => item.id);
+
+      // 3. Dynamically generate the plaintext message
+      const joiner = language === 'pt' ? ' E ' : ' AND ';
+      const itemNames = selected.map(item => item.name[language].toUpperCase()).join(joiner);
+      
+      const generatedPlaintext = language === 'pt'
+        ? `ORDENS DO AGENTE COLETAR O ${itemNames}`
+        : `AGENT ORDERS COLLECT THE ${itemNames}`;
+      
+
+      // 4. Store the generated data in state
+      setDynamicMissionData({
+        requiredItems: requiredItemIds,
+        plaintext: generatedPlaintext,
+      });
+    }
+  }, [missionId, language, selectedMission]);
 
   // Automatically show the codex modal when the screen loads.
   useEffect(() => {
@@ -33,37 +58,30 @@ export default function DecryptionRoomScreen() {
   }, []);
   
   const handleSolve = async () => {
-    // This function is passed to the puzzle components.
-    try {
-      const completed = await AsyncStorage.getItem('completedMissions');
-      const completedList = completed ? JSON.parse(completed) : [];
-      if (!completedList.includes(missionId)) {
-        completedList.push(missionId);
-        await AsyncStorage.setItem('completedMissions', JSON.stringify(completedList));
-      }
-    } catch (e) {
-      console.error("Failed to save progress.", e);
-    }
-
-    // Check if this is the final mission
-    if (missionId === '5') {
-      // If so, go to the game complete screen
-      router.navigate({
-        pathname: '/gameComplete',
-        params: { language: language }
-      });
-    } else {
-      // Otherwise, go to the collection screen as usual
-      router.push({
-        pathname: './collection',
-        params: {
-            missionId: missionId,
-            decryptedMessage: currentPuzzle.plaintext[language],
-            language: language
+      try {
+        const completed = await AsyncStorage.getItem('completedMissions');
+        const completedList = completed ? JSON.parse(completed) : [];
+        if (!completedList.includes(missionId)) {
+          completedList.push(missionId);
+          await AsyncStorage.setItem('completedMissions', JSON.stringify(completedList));
         }
-      });
-    }
-      
+      } catch (e) {
+        console.error("Failed to save progress.", e);
+      }
+
+      if (missionId === '5') {
+        router.navigate({ pathname: '/gameComplete', params: { language: language }});
+      } else {
+        router.push({
+          pathname: './collection',
+          params: {
+              missionId: missionId,
+              decryptedMessage: dynamicMissionData.plaintext,
+              requiredItems: JSON.stringify(dynamicMissionData.requiredItems),
+              language: language
+          }
+        });
+      }
   };
 
   const handleGoBack = () => {
@@ -78,32 +96,37 @@ export default function DecryptionRoomScreen() {
   };
 
   // This function decides which puzzle component to render.
+  // This function decides which puzzle component to render.
   const renderPuzzle = () => {
-    if (!currentPuzzle) return null;
+    if (!currentPuzzle || !dynamicMissionData) return null;
+    
+    // Create a new puzzle object on-the-fly with our dynamic plaintext
+    const puzzleWithDynamicPlaintext = { ...currentPuzzle, plaintext: { en: dynamicMissionData.plaintext, pt: dynamicMissionData.plaintext } };
 
+    // --- THE FIX: Ensure EVERY case passes puzzleWithDynamicPlaintext ---
     switch (selectedMission.cipher) {
         case 'Caesar':
-            return <CaesarPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+            return <CaesarPuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         case 'Atbash':
-            return <AtbashPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+            return <AtbashPuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         case 'Vigenère':
-            return <VigenerePuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+            return <VigenerePuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         case 'Asymmetric':
-            return <AsymmetricPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+            // The Asymmetric puzzle doesn't use plaintext, but we pass it for consistency.
+            return <AsymmetricPuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         case 'Symmetric':
-            return <SymmetricPuzzle puzzle={currentPuzzle} language={language} onSolve={handleSolve} />;
+             // The Symmetric puzzle doesn't use plaintext, but we pass it for consistency.
+            return <SymmetricPuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         default:
             return <Text style={styles.errorText}>Unknown Cipher</Text>;
     }
-  };
-
-  if (!selectedMission || !currentPuzzle) {
+  };        
+                            
+  // Show a loading indicator while the mission data is being generated
+  if (!selectedMission || !currentPuzzle || !dynamicMissionData) {
     return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.errorText}>Mission Data Not Found</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Return to Hub</Text>
-        </TouchableOpacity>
+      <SafeAreaView style={[styles.container, { justifyContent: 'center' }]}>
+        <ActivityIndicator size="large" color="#00ff7f" />
       </SafeAreaView>
     );
   }

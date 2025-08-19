@@ -14,46 +14,40 @@ export const missions = [
     title: { en: 'Operation Nightingale', pt: 'Projeto Rouxinol' }, 
     difficulty: 'Easy', 
     cipher: 'Caesar',
-    requiredItems: ['item-1', 'item-3'] // Requires Microfilm and Keycard
+    numRequiredItems: 2
   },
   { 
     id: '2', 
     title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, 
     difficulty: 'Easy', 
     cipher: 'Atbash',
-    requiredItems: ['item-5'] // Requires Confidential Dossier
+    numRequiredItems: 1
   },
   { 
     id: '3', 
     title: { en: 'Viper\'s Nest', pt: 'Covil da Víbora' }, 
     difficulty: 'Medium', 
     cipher: 'Vigenère',
-    requiredItems: ['item-6', 'item-4'] // Requires Tracking Device and Encrypted USB
+    numRequiredItems: 2
   },
   { 
     id: '4', 
     title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, 
     difficulty: 'Hard', 
     cipher: 'Asymmetric',
-    requiredItems: ['item-2'] // Requires Disguise
+    numRequiredItems: 1
   },
   { 
     id: '5', 
     title: { en: 'Shadow Veil', pt: 'Véu das Sombraas' }, 
     difficulty: 'Hard', 
     cipher: 'Symmetric',
-    requiredItems: ['item-2', 'item-4', 'item-5'] // Requires Disguise, USB, and Dossier
+    numRequiredItems: 3
   },
 ];
 
 export const puzzleData = {
   '1': {
-    plaintext: {
-        //en: 'MEET AT THE OLD BRIDGE AT MIDNIGHT',
-        //pt: 'ENCONTRE NA PONTE VELHA A MEIA NOITE'
-        en: 'AGENT B SENDING NEW ORDERS BRING THE MICROFILM AND THE KEYCARD',
-        pt: 'AGENTE B ENVIANDO NOVAS ORDENS TRAGA O MICROFILME E O CARTAO DE ACESSO'
-    },
     hint: {
       en: 'Agent, this is a simple Caesar cipher. Find the correct numerical shift (1-25) to reveal the message.',
       pt: 'Agente, esta é uma cifra de César simples. Encontre o deslocamento numérico correto (1-25) para revelar a mensagem.'
@@ -67,12 +61,6 @@ export const puzzleData = {
     }
   },
   '2': {
-    plaintext: {
-        //en: 'THE PACKAGE IS IN THE RED LOCKER',
-        //pt: 'O PACOTE ESTA NO ARMARIO VERMELHO'
-        en: 'YOUR NEXT OBJECTIVE IS TO SECURE THE CONFIDENTIAL DOSSIER',
-        pt: 'SEU PROXIMO OBJETIVO E PROTEGER O DOSSIE CONFIDENCIAL'
-    },
     hint: {
         en: 'This message uses an Atbash cipher, a simple substitution where the alphabet is reversed. No key is needed.',
         pt: 'Esta mensagem usa uma cifra de Atbash, uma substituição simples onde o alfabeto é invertido. Nenhuma chave é necessária.'
@@ -80,18 +68,12 @@ export const puzzleData = {
     codex: {
         title: 'Atbash Cipher',
         text: {
-            en: 'The Atbash cipher is a substitution cipher with a specific, fixed key where the letters of the alphabet are reversed.\n\nThe first letter (\'A\') becomes the last (\'Z\'), the second (\'B\') becomes the second to last (\'Y\'), and so on.\n\nBecause there is only one way to apply it, it requires no key.',
+            en: 'The Atbash cipher is a substitution cipher with a specific, fixed key where the letters of the alphabet are reversed.\n\nA primeira letra (\'A\') becomes the last (\'Z\'), the second (\'B\') becomes the second to last (\'Y\'), and so on.\n\nBecause there is only one way to apply it, it requires no key.',
             pt: 'A cifra de Atbash é uma cifra de substituição com uma chave específica e fixa onde as letras do alfabeto são invertidas.\n\nA primeira letra (\'A\') torna-se a última (\'Z\'), a segunda (\'B\') torna-se a penúltima (\'Y\'), e assim por diante.\n\nComo existe apenas uma maneira de aplicá-la, não requer chave.'
         }
     }
   },
   '3': {
-    plaintext: {
-        //en: 'THE EAGLE HAS LANDED',
-        //pt: 'A AGUIA POUSOU'
-        en: 'PLANT THE TRACKING DEVICE ON THE TARGETS ENCRYPTED USB',
-        pt: 'PLANTE O DISPOSITIVO RASTREADOR NO USB CRIPTOGRAFADO DO ALVO'
-    },
     key: 'SECRET',
     hintedKey: 'S_CR_T', // The fill-in-the-blanks hint for the user
     hint: {
@@ -107,12 +89,6 @@ export const puzzleData = {
     }
   },
   '4': {
-    plaintext: {
-        //en: 'MESSAGE IS YELLOW', // The solution is the color itself
-        //pt: 'A MENSAGEM É AMARELA'
-        en: 'URGENT YOU MUST USE A DISGUISE FOR THIS OPERATION',
-        pt: 'URGENTE VOCE DEVE USAR UM DISFARCE PARA ESTA OPERACAO'
-    },
     publicKey: 'BLUE',
     message: 'YELLOW',
     privateKey: 'BLUE', // The "filter" to remove the public key
@@ -130,13 +106,6 @@ export const puzzleData = {
     }
   },
   '5': {
-    plaintext: {
-        //en: 'RENDEZVOUS AT DAWN',
-        //pt: 'ENCONTRO AO AMANHECER'
-        en: 'FINAL MISSION COLLECT THE DISGUISE THE ENCRYPTED USB AND THE CONFIDENTIAL DOSSIER',
-        pt: 'MISSAO FINAL COLETE O DISFARCE O USB CRIPTOGRAFADO E O DOSSIE CONFIDENCIAL'
-    },
-    //key: [0, 4, 8, 3], // The correct pattern sequence (top-left, middle-center, bottom-right, middle-left)
     keyLength: 1, // The length of the random pattern to generate
     hint: {
         en: 'Agent, the key is a shared 1-step pattern. Replicate the sequence on the grid to decrypt the message.',
