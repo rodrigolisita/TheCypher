@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAudio } from '../../hooks/useAudio';
+
 
 // This component contains the UI and logic for the pattern-matching puzzle.
 export default function SymmetricPuzzle({ puzzle, language, onSolve }) {
   const [userPattern, setUserPattern] = useState([]);
+
+  // hook for audio and haptic feedback
+  const { playKeypressSound, playSuccessSound } = useAudio(); 
 
   // Generate a random key pattern once when the component loads.
   const [randomKey] = useState(() => {
@@ -18,6 +23,8 @@ export default function SymmetricPuzzle({ puzzle, language, onSolve }) {
   });
 
   const handleGridPress = (index) => {
+    playKeypressSound(); // Play sound and haptic on key press
+
     // Check if the square is already in the pattern.
     if (userPattern.includes(index)) {
       // If it is, remove it (deselect).
@@ -33,6 +40,7 @@ export default function SymmetricPuzzle({ puzzle, language, onSolve }) {
   const checkSolution = () => {
     // Check if the user's pattern array matches the key array.
     if (JSON.stringify(userPattern) === JSON.stringify(randomKey)) {
+      playSuccessSound();
       onSolve();
     } else {
       alert('Incorrect pattern. Try again.');

@@ -1,9 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react'; // MODIFIED
+import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator // NEW
-  ,
+  ActivityIndicator,
   Alert,
   Image,
   SafeAreaView,
@@ -13,6 +12,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { useAudio } from '../../hooks/useAudio';
 
 // Stores text for both English and Portuguese
 const content = {
@@ -38,11 +38,12 @@ const content = {
 
 export default function App() {
   const [language, setLanguage] = useState('en');
-  // NEW: Loading state to prevent UI flicker while loading from storage
+  // Loading state to prevent UI flicker while loading from storage
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { playKeypressSound } = useAudio();
 
-  // NEW: This useEffect runs once to load the saved language
+  // This useEffect runs once to load the saved language
   useEffect(() => {
     const loadLanguage = async () => {
       try {
@@ -59,8 +60,9 @@ export default function App() {
     loadLanguage();
   }, []);
 
-  // NEW: This function now saves the language choice
+  // saves the language choice
   const handleLanguageChange = async (selectedLang) => {
+    playKeypressSound();
     setLanguage(selectedLang);
     try {
       await AsyncStorage.setItem('user-language', selectedLang);
@@ -69,13 +71,15 @@ export default function App() {
     }
   };
 
-  const handleBeginMission = () => {
+  const handleBeginMission = async () => {
+    await playKeypressSound();
     router.push({
       pathname: '/missionHub',
       params: { language: language }
     });
   };
   const handleResetProgress = async () => {
+    await playKeypressSound();
     Alert.alert(
       content[language].resetConfirmTitle,
       content[language].resetConfirmMessage,

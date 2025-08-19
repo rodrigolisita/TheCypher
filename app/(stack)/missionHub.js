@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
-import { useLocalSearchParams, useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAudio } from '../../hooks/useAudio';
 
 // Mission data, now without the hardcoded 'locked' property.
 const missions = [
@@ -40,6 +41,7 @@ export default function MissionHubScreen() {
   const [isLoading, setIsLoading] = useState(true); // Add loading state
   // Add state to remember the language.
   const [currentLanguage, setCurrentLanguage] = useState(params.language || 'en');
+  const { playAmbianceSound, stopAmbianceSound, isLoaded } = useAudio();
 
   // This effect updates our language state if a new param is passed.
   useEffect(() => {
@@ -69,6 +71,19 @@ export default function MissionHubScreen() {
       loadProgress();
     }, [])
   );
+
+//  useFocusEffect(
+//    React.useCallback(() => {
+//      if (isLoaded) {
+//        playAmbianceSound();
+//      }
+
+      // This function is called when the screen goes out of focus
+//      return () => {
+//        stopAmbianceSound();
+//      };
+//    }, [isLoaded, playAmbianceSound, stopAmbianceSound])
+//  );
 
   const handleMissionSelect = (mission) => {
     // Navigate to the decryption room, passing the mission's ID and language.

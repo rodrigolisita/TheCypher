@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useMemo, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAudio } from '../../hooks/useAudio';
+
 
 const QWERTY_LAYOUT = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -9,6 +11,10 @@ const QWERTY_LAYOUT = [
 
 // This component contains all the UI and logic for the Vigenere puzzle.
 export default function VigenerePuzzle({ puzzle, language, onSolve }) {
+  
+  // hook for audio and haptic feedback
+  const { playKeypressSound, playSuccessSound } = useAudio(); 
+  
   // We now track the full user input, including the pre-filled letters.
   const [userInputKeyword, setUserInputKeyword] = useState(puzzle.hintedKey);
 
@@ -30,6 +36,7 @@ export default function VigenerePuzzle({ puzzle, language, onSolve }) {
   }, [userInputKeyword, ciphertext, language, puzzle]);
 
   const handleKeyPress = (key) => {
+    playKeypressSound(); // Play sound and haptic on key press
     if (key === '⌫') {
       // Find the last letter the user typed and replace it with a '_'
       let lastTypedIndex = -1;
@@ -61,6 +68,7 @@ export default function VigenerePuzzle({ puzzle, language, onSolve }) {
   
   const checkSolution = () => {
     if (userInputKeyword.toUpperCase() === puzzle.key.toUpperCase()) {
+      playSuccessSound();
       onSolve(); // Call the onSolve prop passed from the parent
     } else {
       alert('Incorrect keyword. Try again.');

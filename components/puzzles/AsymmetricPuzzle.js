@@ -1,17 +1,22 @@
-import React, { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
   Alert,
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { useAudio } from '../../hooks/useAudio';
+
 
 // This component contains the UI and logic for our asymmetric key puzzle metaphor.
 export default function AsymmetricPuzzle({ puzzle, language, onSolve }) {
   const [selectedFilter, setSelectedFilter] = useState(null);
   const animation = useRef(new Animated.Value(0)).current;
+  
+  // hook for audio and haptic feedback
+  const { playKeypressSound, playSuccessSound } = useAudio(); 
 
   // This function calculates the "encrypted" color by mixing the public key and the message.
   const getEncryptedColor = (color1, color2) => {
@@ -43,6 +48,7 @@ export default function AsymmetricPuzzle({ puzzle, language, onSolve }) {
 
   const checkSolution = () => {
     if (selectedFilter === puzzle.privateKey) {
+      playSuccessSound();
       Animated.timing(animation, {
         toValue: 1,
         duration: 1000,
@@ -56,6 +62,12 @@ export default function AsymmetricPuzzle({ puzzle, language, onSolve }) {
         language === 'pt' ? 'A mensagem ainda está criptografada.' : 'The message is still encrypted.'
       );
     }
+  };
+
+  // A handler to play sound before selecting the filter
+  const handleFilterSelect = (color) => {
+    playKeypressSound();
+    setSelectedFilter(color);
   };
 
   return (
@@ -90,7 +102,7 @@ export default function AsymmetricPuzzle({ puzzle, language, onSolve }) {
                 { backgroundColor: color.toLowerCase() },
                 selectedFilter === color && styles.selectedFilter,
               ]}
-              onPress={() => setSelectedFilter(color)}
+              onPress={() => handleFilterSelect(color)}
             />
           ))}
         </View>

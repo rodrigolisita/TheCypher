@@ -1,19 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-// Import the puzzle components
 import AsymmetricPuzzle from '../../components/puzzles/AsymmetricPuzzle';
 import AtbashPuzzle from '../../components/puzzles/AtbashPuzzle';
 import CaesarPuzzle from '../../components/puzzles/CaesarPuzzle';
 import SymmetricPuzzle from '../../components/puzzles/SymmetricPuzzle';
 import VigenerePuzzle from '../../components/puzzles/VigenerePuzzle';
-
-// Import the mission data from our central file, including allItems
 import { allItems, missions, puzzleData } from '../../data/missionData';
-
 
 export default function DecryptionRoomScreen() {
   const router = useRouter();
@@ -21,30 +15,19 @@ export default function DecryptionRoomScreen() {
   const [isCodexVisible, setIsCodexVisible] = useState(false);
   const [dynamicMissionData, setDynamicMissionData] = useState(null);
 
-  // Find the static mission data (we still need it for title, cipher, etc.)
   const selectedMission = missions.find(m => m.id === missionId);
   const currentPuzzle = puzzleData[missionId];
 
-  // This useEffect generates the random mission objectives and plaintext
   useEffect(() => {
     if (selectedMission) {
-      // 1. Shuffle all possible items to get a random order
       const shuffled = [...allItems].sort(() => 0.5 - Math.random());
-      
-      // 2. Select the number of items required by the mission
       const selected = shuffled.slice(0, selectedMission.numRequiredItems);
       const requiredItemIds = selected.map(item => item.id);
-
-      // 3. Dynamically generate the plaintext message
       const joiner = language === 'pt' ? ' E ' : ' AND ';
       const itemNames = selected.map(item => item.name[language].toUpperCase()).join(joiner);
-      
       const generatedPlaintext = language === 'pt'
         ? `ORDENS DO AGENTE COLETAR O ${itemNames}`
         : `AGENT ORDERS COLLECT THE ${itemNames}`;
-      
-
-      // 4. Store the generated data in state
       setDynamicMissionData({
         requiredItems: requiredItemIds,
         plaintext: generatedPlaintext,
@@ -52,7 +35,6 @@ export default function DecryptionRoomScreen() {
     }
   }, [missionId, language, selectedMission]);
 
-  // Automatically show the codex modal when the screen loads.
   useEffect(() => {
     setIsCodexVisible(true);
   }, []);
@@ -95,15 +77,11 @@ export default function DecryptionRoomScreen() {
     );
   };
 
-  // This function decides which puzzle component to render.
-  // This function decides which puzzle component to render.
   const renderPuzzle = () => {
     if (!currentPuzzle || !dynamicMissionData) return null;
     
-    // Create a new puzzle object on-the-fly with our dynamic plaintext
     const puzzleWithDynamicPlaintext = { ...currentPuzzle, plaintext: { en: dynamicMissionData.plaintext, pt: dynamicMissionData.plaintext } };
 
-    // --- THE FIX: Ensure EVERY case passes puzzleWithDynamicPlaintext ---
     switch (selectedMission.cipher) {
         case 'Caesar':
             return <CaesarPuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
@@ -112,17 +90,14 @@ export default function DecryptionRoomScreen() {
         case 'Vigenère':
             return <VigenerePuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         case 'Asymmetric':
-            // The Asymmetric puzzle doesn't use plaintext, but we pass it for consistency.
             return <AsymmetricPuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         case 'Symmetric':
-             // The Symmetric puzzle doesn't use plaintext, but we pass it for consistency.
             return <SymmetricPuzzle puzzle={puzzleWithDynamicPlaintext} language={language} onSolve={handleSolve} />;
         default:
             return <Text style={styles.errorText}>Unknown Cipher</Text>;
     }
-  };        
-                            
-  // Show a loading indicator while the mission data is being generated
+  };
+
   if (!selectedMission || !currentPuzzle || !dynamicMissionData) {
     return (
       <SafeAreaView style={[styles.container, { justifyContent: 'center' }]}>
@@ -133,7 +108,6 @@ export default function DecryptionRoomScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Codex Modal for explaining the cipher */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -160,8 +134,9 @@ export default function DecryptionRoomScreen() {
             <Text style={styles.briefingText}>{currentPuzzle.hint[language]}</Text>
         </View>
 
-        {/* Render the correct puzzle component */}
-        {renderPuzzle()}
+        <View style={styles.puzzleWrapper}>
+          {renderPuzzle()}
+        </View>
 
         <View style={styles.bottomActions}>
             <TouchableOpacity style={styles.codexButton} onPress={() => setIsCodexVisible(true)}>
@@ -213,6 +188,10 @@ const styles = StyleSheet.create({
     fontFamily: 'monospace',
     fontSize: 14,
   },
+  puzzleWrapper: {
+    flex: 1,
+    width: '100%',
+  },
   errorText: {
     color: '#ff4444',
     fontSize: 24,
@@ -253,7 +232,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'monospace',
   },
-  // Modal styles
   modalContainer: {
     flex: 1,
     justifyContent: 'center',

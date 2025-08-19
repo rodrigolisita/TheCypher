@@ -1,9 +1,14 @@
 // AtbashPuzzle.js
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useMemo } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAudio } from '../../hooks/useAudio';
+
 
 // This component contains all the UI and logic for the Atbash puzzle.
 export default function AtbashPuzzle({ puzzle, language, onSolve }) {
+
+  // hook for audio and haptic feedback
+  const { playSuccessSound } = useAudio(); 
 
   // Generate the ciphertext.
   const ciphertext = useMemo(() => {
@@ -18,6 +23,12 @@ export default function AtbashPuzzle({ puzzle, language, onSolve }) {
     }
     return decryptedEnglish;
   }, [ciphertext, language, puzzle]);
+
+  // Handler to play the sound before solving
+  const handleConfirm = () => {
+    playSuccessSound();
+    onSolve(); // This navigates to the next step
+  };
 
   return (
     <>
@@ -34,7 +45,7 @@ export default function AtbashPuzzle({ puzzle, language, onSolve }) {
       </View>
 
       <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.decryptButton} onPress={onSolve}>
+        <TouchableOpacity style={styles.decryptButton} onPress={handleConfirm}>
             <Text style={styles.decryptButtonText}>{language === 'pt' ? 'Confirmar' : 'Confirm'}</Text>
         </TouchableOpacity>
       </View>

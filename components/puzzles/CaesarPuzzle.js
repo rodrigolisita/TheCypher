@@ -1,23 +1,22 @@
-// CaesarPuzzle.js
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAudio } from '../../hooks/useAudio';
 
-// This component now contains all the UI and logic for the Caesar puzzle.
 export default function CaesarPuzzle({ puzzle, language, onSolve }) {
   const [userInputKey, setUserInputKey] = useState('');
-
-  // Generate a random key for the puzzle once.
   const [randomKey] = useState(() => Math.floor(Math.random() * 25) + 1);
+  const [displayedMessage, setDisplayedMessage] = useState('');
+  const { playKeypressSound, playSuccessSound } = useAudio();
 
-  // Generate the ciphertext based on the plaintext and the random key.
+
   const ciphertext = useMemo(() => {
     return caesarCipherEncrypt(puzzle.plaintext.en, randomKey);
   }, [puzzle, randomKey]);
 
-  // Decrypt the message in real-time as the user types.
   const calculatedDecryptedMessage = useMemo(() => {
     const key = parseInt(userInputKey, 10);
-    if (isNaN(key)) return ciphertext;
+    //if (isNaN(key)) return ciphertext;
+    if (isNaN(key) || userInputKey === '') return ciphertext;
     
     const decryptedEnglish = caesarCipherDecrypt(ciphertext, key);
     if (language === 'pt' && decryptedEnglish === puzzle.plaintext.en) {
@@ -26,7 +25,41 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
     return decryptedEnglish;
   }, [userInputKey, ciphertext, language, puzzle]);
 
+  // This useEffect creates the "typing" animation
+  useEffect(() => {
+    // This is the timer that waits for the user to stop typing
+    const debounceTimer = setTimeout(() => {
+      // All of our previous animation logic now goes inside this timer
+
+      if (userInputKey === '') {
+          setDisplayedMessage(ciphertext);
+          return;
+      }
+
+      const animateText = (index) => {
+        if (index > calculatedDecryptedMessage.length) {
+          return;
+        }
+        setDisplayedMessage(calculatedDecryptedMessage.substring(0, index));
+        const timeoutId = setTimeout(() => animateText(index + 1), 30);
+        return () => clearTimeout(timeoutId);
+      };
+
+      const cleanupAnimation = animateText(1);
+      // We don't need to return the cleanup function here anymore,
+      // as the outer cleanup handles it.
+
+    }, 500); // Wait 500ms (half a second) after the last keypress
+
+    // This is the crucial part of the debounce:
+    // If the user types another key, the effect re-runs,
+    // and this cleanup function clears the previous timer, canceling the old animation.
+    return () => clearTimeout(debounceTimer);
+    
+  }, [calculatedDecryptedMessage, userInputKey, ciphertext]);
+  
   const handleKeyPress = (key) => {
+    playKeypressSound();
     if (key === '⌫') {
       setUserInputKey(current => current.slice(0, -1));
     } else if (userInputKey.length < 2) {
@@ -36,14 +69,15 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
   
   const checkSolution = () => {
     if (parseInt(userInputKey, 10) === randomKey) {
-      onSolve(); // Call the onSolve prop passed from the parent
+      playSuccessSound();
+      onSolve();
     } else {
       alert('Incorrect. Try a different key.');
     }
   };
 
   return (
-    <>
+    <ScrollView contentContainerStyle={styles.scrollViewContainer}>
       <View style={styles.puzzleContainer}>
         <Text style={styles.label}>{language === 'pt' ? 'Mensagem Criptografada:' : 'Encrypted Message:'}</Text>
         <View style={styles.messageGrid}>
@@ -52,7 +86,7 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
         
         <Text style={styles.label}>{language === 'pt' ? 'Sua Decodificação:' : 'Your Decryption:'}</Text>
         <View style={styles.messageGrid}>
-            <Text style={styles.messageText}>{calculatedDecryptedMessage}</Text>
+            <Text style={styles.messageText}>{displayedMessage}</Text>
         </View>
       </View>
 
@@ -79,11 +113,11 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
             <Text style={styles.decryptButtonText}>{language === 'pt' ? 'Decodificar' : 'Decrypt'}</Text>
         </TouchableOpacity>
       </View>
-    </>
+    </ScrollView>
   );
 }
 
-// --- CIPHER LOGIC ---
+// --- CIPHER LOGIC FUNCTIONS ---
 function caesarCipherDecrypt(ciphertext, shift) {
   return ciphertext.split('').map(char => {
     if (char.match(/[A-Z]/)) {
@@ -106,12 +140,16 @@ function caesarCipherEncrypt(plaintext, shift) {
     }).join('');
 }
 
-// Styles are now specific to this puzzle component
+
 const styles = StyleSheet.create({
+  scrollViewContainer: {
+    flexGrow: 1,
+    justifyContent: 'space-around',
+  },
   puzzleContainer: {
-    flex: 1,
     width: '100%',
     justifyContent: 'center',
+    paddingTop: 20,
   },
   label: {
     color: '#a0a0a0',
