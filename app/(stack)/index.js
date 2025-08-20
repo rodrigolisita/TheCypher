@@ -74,7 +74,7 @@ export default function App() {
   const handleBeginMission = async () => {
     await playKeypressSound();
     router.push({
-      pathname: '/missionHub',
+      pathname: '/narrative',
       params: { language: language }
     });
   };

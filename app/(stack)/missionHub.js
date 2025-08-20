@@ -2,23 +2,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { missions } from '../../data/missionData';
 import { useAudio } from '../../hooks/useAudio';
 
-// Mission data, now without the hardcoded 'locked' property.
-const missions = [
-  { id: '1', title: { en: 'Operation Nightingale', pt: 'Projeto Rouxinol' }, difficulty: 'Easy', cipher: 'Caesar' },
-  { id: '2', title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, difficulty: 'Easy', cipher: 'Atbash' },
-  { id: '3', title: { en: 'Viper\'s Nest', pt: 'Covil da Víbora' }, difficulty: 'Medium', cipher: 'Vigenère' },
-  { id: '4', title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, difficulty: 'Hard', cipher: 'RSA' },
-  { id: '5', title: { en: 'Shadow Veil', pt: 'Véu das Sombras' }, difficulty: 'Hard', cipher: 'AES' },
-];
-
 // Reusable component for displaying a single mission.
-const MissionCell = ({ mission, onPress, language, isUnlocked }) => {
+const MissionCell = ({ mission, onPress, language, isUnlocked, isCompleted }) => {
   return (
     <TouchableOpacity 
-      style={[styles.cell, !isUnlocked && styles.cellLocked]}
-      onPress={() => isUnlocked && onPress(mission)}
+      style={[styles.cell, !isUnlocked && styles.cellLocked, isCompleted && styles.cellCompleted]}
+      onPress={() => isUnlocked && onPress(mission)} 
       disabled={!isUnlocked}
     >
       <View>
@@ -27,21 +19,28 @@ const MissionCell = ({ mission, onPress, language, isUnlocked }) => {
           {language === 'pt' ? 'Dificuldade' : 'Difficulty'}: {mission.difficulty}
         </Text>
       </View>
-      {!isUnlocked && (
+      {/* Show a "LOCKED" or "COMPLETE" message */}
+      {!isUnlocked ? (
         <Text style={styles.lockedText}>LOCKED</Text>
-      )}
+      ) : isCompleted ? (
+        <Text style={styles.completedText}>COMPLETE</Text>
+      ) : null}
     </TouchableOpacity>
   );
 };
+
 
 export default function MissionHubScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const [completedMissions, setCompletedMissions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // Add loading state
-  // Add state to remember the language.
+  const [isLoading, setIsLoading] = useState(true);
   const [currentLanguage, setCurrentLanguage] = useState(params.language || 'en');
-  const { playAmbianceSound, stopAmbianceSound, isLoaded } = useAudio();
+  const { stopAmbianceSound, playAmbianceSound } = useAudio();
+
+  const handleGoBack = () => {
+    router.replace('/');
+  };
 
   // This effect updates our language state if a new param is passed.
   useEffect(() => {
@@ -50,43 +49,43 @@ export default function MissionHubScreen() {
     }
   }, [params.language]);
 
-  // useFocusEffect runs every time the screen comes into view.
+  // 1. This hook ONLY handles loading the saved progress
   useFocusEffect(
     React.useCallback(() => {
+      //playAmbianceSound();
       const loadProgress = async () => {
-        setIsLoading(true); // Start loading
+        setIsLoading(true);
         try {
           const completed = await AsyncStorage.getItem('completedMissions');
           if (completed !== null) {
             setCompletedMissions(JSON.parse(completed));
           } else {
-            setCompletedMissions([]); // Ensure it's an empty array if nothing is stored
+            setCompletedMissions([]);
           }
         } catch (e) {
           console.error("Failed to load progress.", e);
         } finally {
-          setIsLoading(false); // Finish loading
+          setIsLoading(false);
         }
       };
       loadProgress();
+      
     }, [])
   );
 
-//  useFocusEffect(
-//    React.useCallback(() => {
-//      if (isLoaded) {
-//        playAmbianceSound();
-//      }
-
-      // This function is called when the screen goes out of focus
-//      return () => {
-//        stopAmbianceSound();
-//      };
-//    }, [isLoaded, playAmbianceSound, stopAmbianceSound])
-//  );
-
+  // 2. This hook ONLY handles the ambient sound
+  useFocusEffect(
+    React.useCallback(() => {
+      playAmbianceSound();
+      // This cleanup function stops the sound when you leave the screen
+      return () => {
+        stopAmbianceSound();
+      };
+    }, [playAmbianceSound, stopAmbianceSound]) // Added dependencies for correctness
+  );
+  
   const handleMissionSelect = (mission) => {
-    // Navigate to the decryption room, passing the mission's ID and language.
+      // Navigate to the decryption room, passing the mission's ID and language.
     router.push({ 
       pathname: '/decryptionRoom', 
       params: { missionId: mission.id, language: currentLanguage }
@@ -103,7 +102,6 @@ export default function MissionHubScreen() {
           {currentLanguage === 'pt' ? 'Selecione sua próxima missão.' : 'Select your next mission.'}
         </Text>
       </View>
-
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#00ff7f" />
@@ -114,12 +112,14 @@ export default function MissionHubScreen() {
           renderItem={({ item, index }) => {
             // A mission is unlocked if it's the first one, or if the previous one is completed.
             const isUnlocked = index === 0 || completedMissions.includes(missions[index - 1].id);
+            const isCompleted = completedMissions.includes(item.id);
             return (
               <MissionCell 
                 mission={item} 
                 onPress={handleMissionSelect}
                 language={currentLanguage}
                 isUnlocked={isUnlocked}
+                isCompleted={isCompleted}
               />
             );
           }}
@@ -128,7 +128,7 @@ export default function MissionHubScreen() {
         />
       )}
 
-      <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/')}>
+      <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
         <Text style={styles.backButtonText}>
           {currentLanguage === 'pt' ? 'Voltar' : 'Go Back'}
         </Text>
@@ -184,6 +184,10 @@ const styles = StyleSheet.create({
     borderColor: '#555',
     backgroundColor: '#222',
   },
+  cellCompleted: {
+    borderColor: '#555',
+    backgroundColor: '#1f2a24',
+  },
   cellTitle: {
     color: '#fff',
     fontSize: 18,
@@ -201,6 +205,12 @@ const styles = StyleSheet.create({
   },
   lockedText: {
     color: '#ff4444',
+    fontFamily: 'monospace',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  completedText: {
+    color: '#00ff7f', // Hacker green
     fontFamily: 'monospace',
     fontWeight: 'bold',
     fontSize: 16,

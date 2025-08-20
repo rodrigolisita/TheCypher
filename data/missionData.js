@@ -11,35 +11,35 @@ export const allItems = [
 export const missions = [
   { 
     id: '1', 
-    title: { en: 'Operation Nightingale', pt: 'Projeto Rouxinol' }, 
+    title: { en: 'The Rome Directive', pt: 'A Diretiva de Roma' }, 
     difficulty: 'Easy', 
     cipher: 'Caesar',
     numRequiredItems: 2
   },
   { 
     id: '2', 
-    title: { en: 'The Serpent\'s Kiss', pt: 'O Beijo da Serpente' }, 
+    title: { en: 'The Jerusalem Gambit', pt: 'A Manobra de Jerusalém' }, 
     difficulty: 'Easy', 
     cipher: 'Atbash',
     numRequiredItems: 1
   },
   { 
     id: '3', 
-    title: { en: 'Viper\'s Nest', pt: 'Covil da Víbora' }, 
+    title: { en: 'The Paris Enigma', pt: 'O Enigma de Paris' }, 
     difficulty: 'Medium', 
     cipher: 'Vigenère',
     numRequiredItems: 2
   },
   { 
     id: '4', 
-    title: { en: 'Ghost Protocol', pt: 'Protocolo Fantasma' }, 
+    title: { en: 'The London Protocol', pt: 'O Protocolo de Londres' }, 
     difficulty: 'Hard', 
     cipher: 'Asymmetric',
     numRequiredItems: 1
   },
   { 
     id: '5', 
-    title: { en: 'Shadow Veil', pt: 'Véu das Sombraas' }, 
+    title: { en: 'The Berlin Veil', pt: 'O Véu de Berlim' }, 
     difficulty: 'Hard', 
     cipher: 'Symmetric',
     numRequiredItems: 3
@@ -75,7 +75,7 @@ export const puzzleData = {
   },
   '3': {
     key: 'SECRET',
-    hintedKey: 'S_CR_T', // The fill-in-the-blanks hint for the user
+    hintedKey: 'S_C_R_T', // The fill-in-the-blanks hint for the user
     hint: {
         en: 'This Vigenère cipher uses a keyword. Complete the keyword to decrypt the message.',
         pt: 'Esta cifra de Vigenère usa uma palavra-chave. Complete a palavra-chave para descriptografar a mensagem.'

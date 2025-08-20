@@ -1,6 +1,6 @@
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
-import { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 
 export const AudioContext = createContext();
 
@@ -20,7 +20,7 @@ export const AudioProvider = ({ children }) => {
         const { sound: success } = await Audio.Sound.createAsync(require('../assets/sounds/success.mp3'));
         setSuccessSound(success);
         
-        const { sound: ambiance } = await Audio.Sound.createAsync(require('../assets/sounds/hub_ambiance.mp3'));
+        const { sound: ambiance } = await Audio.Sound.createAsync(require('../assets/sounds/ambiance.mp3'));
         await ambiance.setIsLoopingAsync(true);
         setAmbianceSound(ambiance);
       } catch (e) {
@@ -54,14 +54,23 @@ export const AudioProvider = ({ children }) => {
   };
 
   const playAmbianceSound = async () => {
+    if (!ambianceSound) return;
     try {
-      await ambianceSound?.replayAsync();
+      const status = await ambianceSound.getStatusAsync();
+      if (status.isLoaded && !status.isPlaying) {
+        await ambianceSound.playAsync();
+      }
     } catch (e) { console.error("Failed to play ambiance sound", e) }
   };
 
   const stopAmbianceSound = async () => {
+    if (!ambianceSound) return;
     try {
-      await ambianceSound?.stopAsync();
+      // THE FIX: Check the status before stopping
+      const status = await ambianceSound.getStatusAsync();
+      if (status.isLoaded && status.isPlaying) {
+        await ambianceSound.stopAsync();
+      }
     } catch (e) { console.error("Failed to stop ambiance sound", e) }
   };
 
