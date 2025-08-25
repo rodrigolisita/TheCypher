@@ -25,7 +25,9 @@ This project was developed as the final project for the CM3050 - Mobile Developm
 
 ## Project Structure
 
+/*
 The project is organized into a modular structure for clarity and maintainability.
+
 .
 ├── app/                  # Expo Router screens and layouts
 │   ├── (stack)/          # Main screen components for the stack navigator
@@ -35,6 +37,7 @@ The project is organized into a modular structure for clarity and maintainabilit
 ├── context/              # Global React Context providers (e.g., AudioContext)
 ├── data/                 # Centralized game data (missions, items)
 └── hooks/                # Custom React hooks (e.g., useAudio)
+*/
 
 
 ## Getting Started
