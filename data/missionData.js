@@ -1,4 +1,9 @@
-// This file acts as our central database for all mission and puzzle content.
+/**
+ * @file data/missionData.js
+ * @brief Acts as the central database for all mission data, puzzle data, and collectible item information.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 export const allItems = [
   { id: 'item-1', name: { en: 'Microfilm', pt: 'Microfilme' } },
   { id: 'item-2', name: { en: 'Disguise', pt: 'Disfarce' } },
@@ -75,7 +80,7 @@ export const puzzleData = {
   },
   '3': {
     key: 'SECRET',
-    hintedKey: 'S_C_R_T', // The fill-in-the-blanks hint for the user
+    hintedKey: 'S_CR_T', // The fill-in-the-blanks hint for the user
     hint: {
         en: 'This Vigenère cipher uses a keyword. Complete the keyword to decrypt the message.',
         pt: 'Esta cifra de Vigenère usa uma palavra-chave. Complete a palavra-chave para descriptografar a mensagem.'

@@ -1,14 +1,19 @@
+/**
+ * @file components/puzzles/SymmetricPuzzle.js
+ * @brief The metaphorical puzzle for symmetric cryptography, using a pattern-matching grid mechanic.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAudio } from '../../hooks/useAudio';
-
 
 // This component contains the UI and logic for the pattern-matching puzzle.
 export default function SymmetricPuzzle({ puzzle, language, onSolve }) {
   const [userPattern, setUserPattern] = useState([]);
 
   // hook for audio and haptic feedback
-  const { playKeypressSound, playSuccessSound } = useAudio(); 
+  const { playKeypressSound, playSuccessSound, playFailSound } = useAudio(); 
 
   // Generate a random key pattern once when the component loads.
   const [randomKey] = useState(() => {
@@ -22,27 +27,30 @@ export default function SymmetricPuzzle({ puzzle, language, onSolve }) {
     return key;
   });
 
-  const handleGridPress = (index) => {
-    playKeypressSound(); // Play sound and haptic on key press
+  const handleGridPress = async (index) => {
+    await playKeypressSound(); // Play sound and haptic on key press
 
-    // Check if the square is already in the pattern.
     if (userPattern.includes(index)) {
-      // If it is, remove it (deselect).
+      // Case 1: The square is already selected, so deselect it.
       setUserPattern(current => current.filter(item => item !== index));
-    } else {
-      // If it's not, add it, but only if the pattern isn't full yet.
-      if (userPattern.length < puzzle.keyLength) {
-        setUserPattern(current => [...current, index]);
-      }
-    }
-  };
 
-  const checkSolution = () => {
+    } else if (userPattern.length < puzzle.keyLength) {
+      // Case 2: The square is new AND there's still space, so select it.
+      setUserPattern(current => [...current, index]);
+
+    } else {
+      // Case 3: The square is new BUT the pattern is full, so reset the pattern.
+      resetPattern();
+    }
+  }; 
+  
+  const checkSolution = async () => {
     // Check if the user's pattern array matches the key array.
     if (JSON.stringify(userPattern) === JSON.stringify(randomKey)) {
-      playSuccessSound();
+      await playSuccessSound();
       onSolve();
     } else {
+      await playFailSound();
       alert('Incorrect pattern. Try again.');
     }
   };

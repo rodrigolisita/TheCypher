@@ -1,7 +1,14 @@
+/**
+ * @file app/(stack)/decryptionRoom.js
+ * @brief Acts as a controller screen that dynamically generates mission objectives and renders the appropriate puzzle component.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+// import puzzle components
 import AsymmetricPuzzle from '../../components/puzzles/AsymmetricPuzzle';
 import AtbashPuzzle from '../../components/puzzles/AtbashPuzzle';
 import CaesarPuzzle from '../../components/puzzles/CaesarPuzzle';
@@ -51,9 +58,9 @@ export default function DecryptionRoomScreen() {
         console.error("Failed to save progress.", e);
       }
 
-      if (missionId === '5') {
+      if (missionId === '5') { // Last mission
         router.navigate({ pathname: '/gameComplete', params: { language: language }});
-      } else {
+      } else { // not last mission
         router.push({
           pathname: './collection',
           params: {

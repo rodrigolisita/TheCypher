@@ -1,8 +1,12 @@
-// AtbashPuzzle.js
+/**
+ * @file components/puzzles/AtbashPuzzle.js
+ * @brief The puzzle component for the Atbash cipher, which is solved automatically and requires user confirmation.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAudio } from '../../hooks/useAudio';
-
 
 // This component contains all the UI and logic for the Atbash puzzle.
 export default function AtbashPuzzle({ puzzle, language, onSolve }) {

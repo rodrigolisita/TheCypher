@@ -1,3 +1,9 @@
+/**
+ * @file app/(stack)/narrative.js
+ * @brief Displays the introductory narrative screen that sets up the story for the player.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAudio } from '../../hooks/useAudio';

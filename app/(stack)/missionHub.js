@@ -1,3 +1,9 @@
+/**
+ * @file app/(stack)/missionHub.js
+ * @brief The main menu screen where players can view and select missions. Manages the display of locked, unlocked, and completed states.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -81,7 +87,7 @@ export default function MissionHubScreen() {
       return () => {
         stopAmbianceSound();
       };
-    }, [playAmbianceSound, stopAmbianceSound]) // Added dependencies for correctness
+    }, [playAmbianceSound, stopAmbianceSound])
   );
   
   const handleMissionSelect = (mission) => {

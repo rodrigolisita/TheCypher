@@ -1,3 +1,9 @@
+/**
+ * @file context/AudioContext.js
+ * @brief Creates and provides the global context for managing all audio and haptic feedback throughout the app.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import React, { createContext, useEffect, useState } from 'react';
@@ -7,6 +13,7 @@ export const AudioContext = createContext();
 export const AudioProvider = ({ children }) => {
   const [keypressSound, setKeypressSound] = useState();
   const [successSound, setSuccessSound] = useState();
+  const [failSound, setFailSound] = useState();
   const [ambianceSound, setAmbianceSound] = useState();
 
   useEffect(() => {
@@ -19,6 +26,9 @@ export const AudioProvider = ({ children }) => {
 
         const { sound: success } = await Audio.Sound.createAsync(require('../assets/sounds/success.mp3'));
         setSuccessSound(success);
+
+        const { sound: fail } = await Audio.Sound.createAsync(require('../assets/sounds/fail.mp3'));
+        setFailSound(fail);
         
         const { sound: ambiance } = await Audio.Sound.createAsync(require('../assets/sounds/ambiance.mp3'));
         await ambiance.setIsLoopingAsync(true);
@@ -35,6 +45,7 @@ export const AudioProvider = ({ children }) => {
       console.log('Unloading all sounds...');
       keypressSound?.unloadAsync();
       successSound?.unloadAsync();
+      failSound?.unloadAsync();
       ambianceSound?.unloadAsync();
     };
   }, []);
@@ -53,6 +64,13 @@ export const AudioProvider = ({ children }) => {
     } catch (e) { console.error("Failed to play success sound", e) }
   };
 
+  const playFailSound = async () => {
+  try {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    await failSound?.replayAsync();
+  } catch (e) { console.error("Failed to play fail sound", e) }
+};
+
   const playAmbianceSound = async () => {
     if (!ambianceSound) return;
     try {
@@ -66,7 +84,7 @@ export const AudioProvider = ({ children }) => {
   const stopAmbianceSound = async () => {
     if (!ambianceSound) return;
     try {
-      // THE FIX: Check the status before stopping
+      // Check the status before stopping
       const status = await ambianceSound.getStatusAsync();
       if (status.isLoaded && status.isPlaying) {
         await ambianceSound.stopAsync();
@@ -74,7 +92,7 @@ export const AudioProvider = ({ children }) => {
     } catch (e) { console.error("Failed to stop ambiance sound", e) }
   };
 
-  const value = { playKeypressSound, playSuccessSound, playAmbianceSound, stopAmbianceSound };
+  const value = { playKeypressSound, playSuccessSound, playFailSound, playAmbianceSound, stopAmbianceSound };
 
   return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
 };

@@ -1,15 +1,24 @@
+/**
+ * @file app/stack/collection.js
+ * @brief The item collection screen, displayed after a puzzle is solved, where the player must select the correct items.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { allItems } from '../../data/missionData';
+import { useAudio } from '../../hooks/useAudio';
 
 export default function CollectionScreen() {
   const router = useRouter();
   const { language, decryptedMessage, missionId, requiredItems } = useLocalSearchParams();
   const [selectedItems, setSelectedItems] = useState([]);
+  // hook for audio and haptic feedback
+  const { playKeypressSound, playSuccessSound } = useAudio(); 
 
-  // The logic now uses the requiredItems passed via navigation params
+  // The logic uses the requiredItems passed via navigation params
   const isSelectionCorrect = useMemo(() => {
     if (!requiredItems) return false;
 
@@ -30,6 +39,7 @@ export default function CollectionScreen() {
       const completedList = completed ? JSON.parse(completed) : [];
       if (!completedList.includes(missionId)) {
         completedList.push(missionId);
+        await playSuccessSound();
         await AsyncStorage.setItem('completedMissions', JSON.stringify(completedList));
         console.log(`Progress saved! Mission ${missionId} completed.`);
       }
@@ -44,7 +54,8 @@ export default function CollectionScreen() {
     });
   };
 
-  const handleItemPress = (itemId) => {
+  const handleItemPress = async (itemId) => {
+    await playKeypressSound(); // Play sound and haptic on key press
     setSelectedItems(prevSelected =>
       prevSelected.includes(itemId)
         ? prevSelected.filter(id => id !== itemId)

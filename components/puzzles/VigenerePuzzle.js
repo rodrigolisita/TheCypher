@@ -1,3 +1,9 @@
+/**
+ * @file components/puzzles/VigenerePuzzle.js
+ * @brief The puzzle component for the Vigenère cipher, featuring a QWERTY keyboard for keyword input.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import { useMemo, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAudio } from '../../hooks/useAudio';
@@ -13,9 +19,9 @@ const QWERTY_LAYOUT = [
 export default function VigenerePuzzle({ puzzle, language, onSolve }) {
   
   // hook for audio and haptic feedback
-  const { playKeypressSound, playSuccessSound } = useAudio(); 
+  const { playKeypressSound, playSuccessSound, playFailSound } = useAudio(); 
   
-  // We now track the full user input, including the pre-filled letters.
+  // track the full user input, including the pre-filled letters.
   const [userInputKeyword, setUserInputKeyword] = useState(puzzle.hintedKey);
 
   // The ciphertext is pre-calculated based on the correct keyword.
@@ -35,8 +41,8 @@ export default function VigenerePuzzle({ puzzle, language, onSolve }) {
     return decryptedEnglish;
   }, [userInputKeyword, ciphertext, language, puzzle]);
 
-  const handleKeyPress = (key) => {
-    playKeypressSound(); // Play sound and haptic on key press
+  const handleKeyPress = async (key) => {
+    await playKeypressSound(); // Play sound and haptic on key press
     if (key === '⌫') {
       // Find the last letter the user typed and replace it with a '_'
       let lastTypedIndex = -1;
@@ -66,11 +72,12 @@ export default function VigenerePuzzle({ puzzle, language, onSolve }) {
     }
   };
   
-  const checkSolution = () => {
+  const checkSolution = async () => {
     if (userInputKeyword.toUpperCase() === puzzle.key.toUpperCase()) {
-      playSuccessSound();
+      await playSuccessSound();
       onSolve(); // Call the onSolve prop passed from the parent
     } else {
+      await playFailSound();
       alert('Incorrect keyword. Try again.');
     }
   };
@@ -146,7 +153,7 @@ const vigenereCipherEncrypt = (plaintext, key) => vigenereCipher(plaintext, key,
 const vigenereCipherDecrypt = (ciphertext, key) => vigenereCipher(ciphertext, key, false);
 
 
-// Styles are now specific to this puzzle component
+// Styles are specific to this puzzle component
 const styles = StyleSheet.create({
   puzzleContainer: {
     flex: 1,

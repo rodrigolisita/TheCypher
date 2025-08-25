@@ -1,3 +1,9 @@
+/**
+ * @file app/(stack)/index.js
+ * @brief The initial screen of the application, responsible for language selection and progress reset.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -101,7 +107,7 @@ export default function App() {
     );
   };
 
-  // NEW: While loading from storage, show a spinner
+  // While loading from storage, show a spinner
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -122,18 +128,18 @@ export default function App() {
       <View style={styles.languageSelector}>
         <Text style={styles.prompt}>{content[language].selectPrompt}</Text>
         <View style={styles.flagsContainer}>
-          {/* MODIFIED: Use the new handler function */}
+          {/* Use the handler function */}
           <TouchableOpacity onPress={() => handleLanguageChange('en')}>
             <Image 
-              source={require('../../assets/flag_uk.png')}
+              source={require('../../assets/images/flag_uk.png')}
               style={[styles.flag, language === 'en' && styles.selectedFlag]} 
               onError={(e) => console.log('Error loading UK flag:', e.nativeEvent.error)}
             />
           </TouchableOpacity>
-          {/* MODIFIED: Use the new handler function */}
+          {/* Use the handler function */}
           <TouchableOpacity onPress={() => handleLanguageChange('pt')}>
             <Image 
-              source={require('../../assets/flag_brazil.png')}
+              source={require('../../assets/images/flag_brazil.png')}
               style={[styles.flag, language === 'pt' && styles.selectedFlag]} 
               onError={(e) => console.log('Error loading Brazil flag:', e.nativeEvent.error)}
             />
@@ -153,7 +159,7 @@ export default function App() {
   );
 }
 
-// All styles are in one place for organization
+// All styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -169,7 +175,7 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: '#00ff7f', // Hacker green for a thematic feel
-    fontFamily: 'monospace', // Use a monospace font for the spy theme
+    fontFamily: 'monospace', // monospace font for the spy theme
   },
   subtitle: {
     fontSize: 16,

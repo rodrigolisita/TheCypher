@@ -1,3 +1,9 @@
+/**
+ * @file components/puzzles/CaesarPuzzle.js
+ * @brief The puzzle component for the Caesar cipher, featuring a numeric keypad for input.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import { useEffect, useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAudio } from '../../hooks/useAudio';
@@ -6,7 +12,7 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
   const [userInputKey, setUserInputKey] = useState('');
   const [randomKey] = useState(() => Math.floor(Math.random() * 25) + 1);
   const [displayedMessage, setDisplayedMessage] = useState('');
-  const { playKeypressSound, playSuccessSound } = useAudio();
+  const { playKeypressSound, playSuccessSound, playFailSound } = useAudio();
 
 
   const ciphertext = useMemo(() => {
@@ -15,7 +21,6 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
 
   const calculatedDecryptedMessage = useMemo(() => {
     const key = parseInt(userInputKey, 10);
-    //if (isNaN(key)) return ciphertext;
     if (isNaN(key) || userInputKey === '') return ciphertext;
     
     const decryptedEnglish = caesarCipherDecrypt(ciphertext, key);
@@ -29,7 +34,7 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
   useEffect(() => {
     // This is the timer that waits for the user to stop typing
     const debounceTimer = setTimeout(() => {
-      // All of our previous animation logic now goes inside this timer
+      // All animation logic goes inside this timer
 
       if (userInputKey === '') {
           setDisplayedMessage(ciphertext);
@@ -46,8 +51,6 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
       };
 
       const cleanupAnimation = animateText(1);
-      // We don't need to return the cleanup function here anymore,
-      // as the outer cleanup handles it.
 
     }, 500); // Wait 500ms (half a second) after the last keypress
 
@@ -67,11 +70,12 @@ export default function CaesarPuzzle({ puzzle, language, onSolve }) {
     }
   };
   
-  const checkSolution = () => {
+  const checkSolution = async () => {
     if (parseInt(userInputKey, 10) === randomKey) {
-      playSuccessSound();
+      await playSuccessSound();
       onSolve();
     } else {
+      await playFailSound()
       alert('Incorrect. Try a different key.');
     }
   };

@@ -1,3 +1,9 @@
+/**
+ * @file app/(stack)/gameComplete.js
+ * @brief The final screen shown to the player after completing all missions, with an option to play again.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';

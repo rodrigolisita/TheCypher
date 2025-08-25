@@ -1,3 +1,9 @@
+/**
+ * @file components/puzzles/AsymmetricPuzzle.js
+ * @brief The metaphorical puzzle for asymmetric cryptography, using a color-mixing and filtering mechanic.
+ * @author Rodrigo Lisita Ribera
+ * @date August 2025
+ */
 import { useRef, useState } from 'react';
 import {
   Alert,
@@ -9,14 +15,13 @@ import {
 } from 'react-native';
 import { useAudio } from '../../hooks/useAudio';
 
-
 // This component contains the UI and logic for our asymmetric key puzzle metaphor.
 export default function AsymmetricPuzzle({ puzzle, language, onSolve }) {
   const [selectedFilter, setSelectedFilter] = useState(null);
   const animation = useRef(new Animated.Value(0)).current;
   
   // hook for audio and haptic feedback
-  const { playKeypressSound, playSuccessSound } = useAudio(); 
+  const { playKeypressSound, playSuccessSound, playFailSound } = useAudio(); 
 
   // This function calculates the "encrypted" color by mixing the public key and the message.
   const getEncryptedColor = (color1, color2) => {
@@ -46,9 +51,9 @@ export default function AsymmetricPuzzle({ puzzle, language, onSolve }) {
     outputRange: ['rgba(0,0,0,0)', 'rgba(0,255,127,0.6)'], // no shadow to green glow
   });
 
-  const checkSolution = () => {
+  const checkSolution = async () => {
     if (selectedFilter === puzzle.privateKey) {
-      playSuccessSound();
+      await playSuccessSound();
       Animated.timing(animation, {
         toValue: 1,
         duration: 1000,
@@ -57,6 +62,7 @@ export default function AsymmetricPuzzle({ puzzle, language, onSolve }) {
         onSolve();
       });
     } else {
+      await playFailSound()
       Alert.alert(
         language === 'pt' ? 'Filtro Incorreto' : 'Incorrect Filter',
         language === 'pt' ? 'A mensagem ainda está criptografada.' : 'The message is still encrypted.'
