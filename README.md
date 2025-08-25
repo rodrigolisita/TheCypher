@@ -1,6 +1,9 @@
 
 ## The Cypher
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repo-blue?logo=github)](https://github.com/rodrigolisita/TheCypher)
+
+
 "The Cypher" is an immersive, educational puzzle game for mobile devices, built with React Native and Expo. Players take on the role of Agent Bob, a spy in training, whose mission is to decrypt messages from his handler, Agent Alice. The game blends a compelling spy narrative with practical, hands-on cryptography puzzles.
 
 This project was developed as the final project for the CM3050 - Mobile Development module.
@@ -25,8 +28,7 @@ This project was developed as the final project for the CM3050 - Mobile Developm
 
 ## Project Structure
 
-/*
-The project is organized into a modular structure for clarity and maintainability.
+**The project is organized into a modular structure for clarity and maintainability.**
 
 .
 ├── app/                  # Expo Router screens and layouts
@@ -44,8 +46,6 @@ The project is organized into a modular structure for clarity and maintainabilit
 ├── data/                 # Centralized game data (missions, items)
 
 └── hooks/                # Custom React hooks (e.g., useAudio)
-
-*/
 
 
 ## Getting Started
