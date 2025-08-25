@@ -31,6 +31,7 @@ This project was developed as the final project for the CM3050 - Mobile Developm
 **The project is organized into a modular structure for clarity and maintainability.**
 
 .
+
 ├── app/                  # Expo Router screens and layouts
 
 │   ├── (stack)/          # Main screen components for the stack navigator
