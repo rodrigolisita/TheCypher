@@ -30,13 +30,21 @@ The project is organized into a modular structure for clarity and maintainabilit
 
 .
 ├── app/                  # Expo Router screens and layouts
+
 │   ├── (stack)/          # Main screen components for the stack navigator
+
 │   └── _layout.js        # Root layout with the global AudioProvider
+
 ├── assets/               # Static assets (images, sounds, fonts)
+
 ├── components/           # Reusable components (e.g., puzzles)
+
 ├── context/              # Global React Context providers (e.g., AudioContext)
+
 ├── data/                 # Centralized game data (missions, items)
+
 └── hooks/                # Custom React hooks (e.g., useAudio)
+
 */
 
 
