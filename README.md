@@ -54,7 +54,7 @@ This project has been published using EAS Update. You can run the full applicati
 1.  Download the **Expo Go** app on your iOS or Android device.
 2.  Scan the QR code below with your phone's camera.
 
-![The Cypher QR Code](./assets/eas-update.svg)
+![The Cypher QR Code](./assets/images/eas-update.svg)
 
 
 Alternatively, you can visit the project's update page here: 
